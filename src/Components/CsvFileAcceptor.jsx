@@ -1,10 +1,34 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Stack, Box } from "@mui/material";
 import { useDropzone } from "react-dropzone";
-import csv from "csv-parser";
+import Papa from "papaparse";
+import { PublicKey } from "@solana/web3.js";
 
-export const CsvFileAcceptor = () => {
-    const { acceptedFiles, isFocused, isDragAccept, isDragReject, getInputProps, getRootProps } = useDropzone({ maxFiles: 1, accept: { 'text/csv': [".csv", ".txt"] } });
+export const CsvFileAcceptor = ({ onRowsLoaded }) => {
+    const { acceptedFiles, isFocused, isDragAccept, isDragReject, getInputProps, getRootProps } = useDropzone({ maxFiles: 1, accept: { 'text/csv': [".csv", ".txt"] }, onDrop });
+
+    function onDrop(acceptedFiles) {
+        const file = acceptedFiles[0];
+        const parsed = [];
+
+        if (file) {
+            Papa.parse(file, {
+                step: (results, parser) => {
+                    console.log("wtf", results)
+                    let { data } = results;
+                    let [address, mintAddress, amount] = data;
+                    console.log("???", { address, mintAddress, amount })
+                    address = new PublicKey(address);
+                    mintAddress = new PublicKey(mintAddress);
+
+                    parsed.push({ address, mintAddress, amount });
+                },
+                complete: () => {
+                    onRowsLoaded(parsed);
+                }
+            })
+        }
+    }
 
     return <Stack direction="row" justifyContent={"center"}>
         <Box {...getRootProps({ isFocused, isDragAccept, isDragReject })}>
