@@ -7,6 +7,7 @@ import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import { useWallet } from "@solana/wallet-adapter-react";
 import { CsvFileAcceptor } from "../Components/CsvFileAcceptor";
 import { Rows } from "../Components/Rows";
+import dumbo from "../dumbo.png";
 
 export const Home = () => {
     const wallet = useWallet();
@@ -20,11 +21,16 @@ export const Home = () => {
         <Stack direction={"column"}>
             <AppBar position={"sticky"} sx={{ padding: "8px" }}>
                 <Stack direction="row" justifyContent={"space-between"}>
-                    <Typography variant="h4">Dropper </Typography>
+                    <Box sx={{ width: "200px" }}>
+                        <Stack direction="row" justifyContent={"space-between"} >
+                            <img width="80px" height="80px" src={dumbo} />
+                            <Typography variant="h4">Dropper </Typography>
+                        </Stack>
+                    </Box>
                     <WalletMultiButton />
                 </Stack>
             </AppBar>
             {rows.length ? <Rows rows={rows} /> : <CsvFileAcceptor onRowsLoaded={onRowsLoaded} />}
-        </Stack>
-    </Box>
+        </Stack >
+    </Box >
 }
