@@ -1,15 +1,60 @@
-import Table from '@mui/material/Table';
+// import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
+import { AutoSizer, Column, Table } from 'react-virtualized';
+import clsx from 'clsx';
+import { styled } from '@mui/material/styles';
 
-export const Rows = ({ rows }) => {
+
+export const Rows = ({ columns, rowHeight, onRowClick, headerHeight, rowCount, rowGetter }) => {
+    const headerRenderer = ({ label, columnIndex }) => {
+        return <h1>hi</h1>
+    }
+
+    const cellRenderer = ({ cellData, columnIndex }) => {
+        console.log("celldata", cellData)
+        return (
+            <TableCell
+                component="div"
+                variant="body"
+                style={{ height: rowHeight }}
+            >
+                {<span>hi</span>}
+            </TableCell>
+        );
+    }
+
+    const getRowClassName = () => {
+    }
+
+    return (
+        // <AutoSizer>{({ height, width }) => {
+        <Table
+            height={500}
+            width={1000}
+            rowHeight={rowHeight}
+            gridStyle={{
+                direction: 'inherit',
+            }}
+            headerHeight={headerHeight}
+            // rowClassName={getRowClassName}
+            rowCount={rowCount}
+            rowGetter={rowGetter}
+            cellRenderer={cellRenderer}
+        ></Table>
+        // }}
+        // </AutoSizer>
+    );
+}
+
+export const RowsOld = ({ rows }) => {
     return (
         <TableContainer component={Paper}>
-            <Table sx={{ minWidth: 650 }} size="small" aria-label="a dense table">
+            <Table >
                 <TableHead>
                     <TableRow>
                         <TableCell>Address</TableCell>
@@ -35,7 +80,6 @@ export const Rows = ({ rows }) => {
         </TableContainer>
     );
 }
-
 // import { Stack } from "@mui/material"
 
 // export const Rows = ({ rows }) => {
