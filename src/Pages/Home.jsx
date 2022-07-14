@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { AppBar } from "@mui/material"
-import { Box } from "@mui/system"
+import { AppBar, Button } from "@mui/material"
+import { Box } from "@mui/material";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
@@ -23,14 +23,17 @@ export const Home = () => {
                 <Stack direction="row" justifyContent={"space-between"}>
                     <Box sx={{ width: "200px" }}>
                         <Stack direction="row" justifyContent={"space-between"} >
-                            <img width="80px" height="80px" src={dumbo} />
-                            <Typography variant="h4">Dropper </Typography>
+                            <Typography variant="h4">🐘 Dropper</Typography>
                         </Stack>
                     </Box>
                     <WalletMultiButton />
                 </Stack>
             </AppBar>
-            {rows.length ? <Rows rows={rows} /> : <CsvFileAcceptor onRowsLoaded={onRowsLoaded} />}
+            {rows.length ? <Stack>
+                <Typography variant="h1">Airdrop to {rows.length} addresses?</Typography>
+                <Button onClick={() => console.log("doing it")}>GO</Button>
+                <Rows rows={rows} />
+            </Stack> : <CsvFileAcceptor onRowsLoaded={onRowsLoaded} />}
         </Stack >
     </Box >
 }
