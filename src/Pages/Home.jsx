@@ -4,17 +4,23 @@ import { Box } from "@mui/material";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
-import { useWallet } from "@solana/wallet-adapter-react";
+import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { CsvFileAcceptor } from "../Components/CsvFileAcceptor";
-import { Rows } from "../Components/Rows";
-import dumbo from "../dumbo.png";
+import { handleDrop } from "../util/airdrop";
+import { Connection, clusterApiUrl } from "@solana/web3.js"
+
 
 export const Home = () => {
+    const { connection } = useConnection();
     const wallet = useWallet();
     const [rows, setRows] = useState([]);
 
     const onRowsLoaded = (data) => {
         setRows(data);
+    }
+
+    const handleGoButtonClick = () => {
+        handleDrop(connection, rows[0], wallet).then(() => { console.log("done!").catch(() => { console.log("failed") }) })
     }
 
     return <Box>
@@ -29,10 +35,9 @@ export const Home = () => {
                     <WalletMultiButton />
                 </Stack>
             </AppBar>
-            {rows.length ? <Stack>
-                <Typography variant="h1">Airdrop to {rows.length} addresses?</Typography>
-                <Button onClick={() => console.log("doing it")}>GO</Button>
-                <Rows rows={rows} />
+            {rows.length ? <Stack direction={"column"} alignItems={"center"} spacing={"space-around"}>
+                <Typography>Ready to airdrop to {rows.length} addresses.</Typography>
+                <Button variant={"contained"} sx={{ width: 250 }} onClick={handleGoButtonClick}>GO</Button>
             </Stack> : <CsvFileAcceptor onRowsLoaded={onRowsLoaded} />}
         </Stack >
     </Box >
