@@ -20,7 +20,7 @@ export const Home = () => {
     }
 
     const handleGoButtonClick = () => {
-        handleDrop(connection, rows[0], wallet).then(() => { console.log("done!").catch(() => { console.log("failed") }) })
+        handleDrop(connection, rows[0], wallet).then(() => { console.log("done!") }).catch(() => { console.log("failed") })
     }
 
     return <Box>

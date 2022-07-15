@@ -1,44 +1,33 @@
 import { SystemProgram, Transaction } from "@solana/web3.js";
-import { Mint, createInitializeAccountInstruction, getAssociatedTokenAddress, getAccount, TokenAccountNotFoundError, createTransferInstruction } from "@solana/spl-token";
+import { Token, TOKEN_PROGRAM_ID, MintLayout, AccountLayout, ASSOCIATED_TOKEN_PROGRAM_ID } from "@solana/spl-token";
 
 
 export const handleDrop = async (connection, rowData, wallet) => {
     const { address, mintAddress, amount } = rowData;
-    const tx1 = new Transaction();
-
-    console.log("rowdata", rowData);
-    console.log("publickey", wallet.publicKey)
-    const solTransferIx = SystemProgram.transfer({
-        fromPubkey: wallet.publicKey,
-        toPubkey: address,
-        lamports: 100000
-    })
-
-    tx1.add(solTransferIx);
-
-    const sig = await wallet.sendTransaction(tx1, connection);
-
-    console.log("sig", sig);
-    return;
-
-
-
 
     const tx = new Transaction();
 
-
-    const associatedTokenAccountAddress = await getAssociatedTokenAddress(mintAddress, address, false);
+    const associatedTokenAccountAddress = await Token.getAssociatedTokenAddress(ASSOCIATED_TOKEN_PROGRAM_ID, TOKEN_PROGRAM_ID, mintAddress, address, false);
     const accountExists = await associatedTokenAccountExists(connection, associatedTokenAccountAddress, mintAddress);
 
     if (!accountExists) {
-        tx.add(createInitializeAccountInstruction(associatedTokenAccountAddress, mintAddress, address));
+        const createAssociatedTokenAccountIx = Token.createAssociatedTokenAccountInstruction(ASSOCIATED_TOKEN_PROGRAM_ID, TOKEN_PROGRAM_ID, mintAddress, associatedTokenAccountAddress, address, wallet.publicKey);
+        tx.add(createAssociatedTokenAccountIx);
     }
-    const transferIx = createTransferInstruction(wallet.publicKey, associatedTokenAccountAddress, address, Number(amount))
+
+    const issuerAssociatedTokenAccountAddress = await Token.getAssociatedTokenAddress(ASSOCIATED_TOKEN_PROGRAM_ID, TOKEN_PROGRAM_ID, mintAddress, wallet.publicKey, false);
+    const transferIx = Token.createTransferInstruction(TOKEN_PROGRAM_ID, issuerAssociatedTokenAccountAddress, associatedTokenAccountAddress, wallet.publicKey, [], 100)
     tx.add(transferIx);
 
     try {
-        const sig = await wallet.sendTransaction(tx, connection)
-        console.log(sig);
+        const { blockhash } = await connection.getRecentBlockhash();
+        tx.feePayer = wallet.publicKey;
+        tx.recentBlockhash = blockhash;
+
+        const signed = await wallet.signTransaction(tx);
+        const sig = connection.sendRawTransaction(tx.serialize());
+
+        // associate this row with its transaction.
     } catch (e) {
         // propagate failure to top level.
         console.log("failed!!!");
@@ -48,14 +37,22 @@ export const handleDrop = async (connection, rowData, wallet) => {
 
 const associatedTokenAccountExists = async (connection, associatedTokenAccountAddress) => {
     try {
-        await getAccount(connection, associatedTokenAccountAddress);
-        return true;
-    } catch (e) {
-        if (e instanceof TokenAccountNotFoundError) {
-            return false;
+        const account = await connection.getAccountInfo(associatedTokenAccountAddress);
+
+        console.log("ata?", associatedTokenAccountAddress.toBase58())
+        if (account) {
+            const { data } = account;
+            console.log("data", data)
+            return true;
         } else {
-            throw e;
+            return false;
         }
+    } catch (e) {
+        // if (e instanceof TokenAccountNotFoundError) {
+        //     return false;
+        // } else {
+        throw e;
+        // }
 
     }
 
