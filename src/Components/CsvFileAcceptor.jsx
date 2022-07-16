@@ -4,10 +4,11 @@ import { useDropzone } from "react-dropzone";
 import Papa from "papaparse";
 import { PublicKey } from "@solana/web3.js";
 
-export const CsvFileAcceptor = ({ onRowsLoaded }) => {
+export const CsvFileAcceptor = ({ onRowsLoaded, setLoading }) => {
     const { isFocused, isDragAccept, isDragReject, getInputProps, getRootProps } = useDropzone({ maxFiles: 1, accept: { 'text/csv': [".csv", ".txt"] }, onDrop });
 
     function onDrop(acceptedFiles) {
+        setLoading(true);
         const file = acceptedFiles[0];
         const parsed = [];
 
@@ -24,6 +25,7 @@ export const CsvFileAcceptor = ({ onRowsLoaded }) => {
                 },
                 complete: () => {
                     onRowsLoaded(parsed);
+                    setLoading(false);
                 }
             })
         }
