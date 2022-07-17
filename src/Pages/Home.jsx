@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { AppBar, Button } from "@mui/material";
+import { AppBar, Button, Link } from "@mui/material";
 import { CircularProgress } from "@mui/material";
 import { LinearProgress } from "@mui/material";
 import { Box } from "@mui/material";
@@ -26,7 +26,14 @@ export const Home = () => {
         setRows(data);
     }
 
-    const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+    const mapFailuresToCsv = (failures) => {
+        let buf = "";
+        failures.forEach(f => {
+            buf += `${f.address},${f.mintAddress},${f.amount}\n`;
+        })
+        return buf
+    }
 
     const handleGoButtonClick = async () => {
         setLoading(true);
@@ -38,22 +45,19 @@ export const Home = () => {
         for (let i = 0; i < rows.length; i++) {
             let row = rows[i];
             const { transaction } = await makeDropTransaction(connection, wallet, row, i);
-            mappa.set(transaction, i);
+            mappa.set(i, row);
             transactions.push(transaction);
             setProgress(((i + 1) / rows.length) * 100)
         }
 
         const signed = await wallet.signAllTransactions(transactions);
-        console.log("signed?", signed);
         const serialized = signed.map(t => t.serialize());
-        console.log("serialized", serialized)
         setProgress(0);
         setDropState("running");
 
         for (let i = 0; i < serialized.length; i++) {
             try {
-                const sig = await connection.sendRawTransaction(serialized[i]);
-                console.log("sig", sig);
+                await connection.sendRawTransaction(serialized[i]);
             } catch (e) {
                 console.log(e);
                 failures.push(i);
@@ -61,8 +65,13 @@ export const Home = () => {
 
             setProgress(((i + 1) / rows.length) * 100);
         }
-        setFailures(tempFailures);
+
+        if (failures.length) {
+            const failedRows = failures.map(n => mappa.get(n))
+            setFailures(failedRows);
+        }
         setDropState("done");
+        setProgress(0)
         setLoading(false);
     }
 
@@ -88,9 +97,10 @@ export const Home = () => {
                                 <LinearProgress sx={{ width: "90%", height: 20, marginTop: 100, marginBottom: 100 }} variant="determinate" value={progress} />
                             </>
                             :
-                            <Typography variant="h1">Ready to airdrop to {rows.length} addresses.</Typography>
+                            dropState == "done" ? <Typography variant="h1">Airdrop completed.</Typography> : <Typography variant="h1">Ready to airdrop to {rows.length} addresses.</Typography>
                         }
-                        <Button disabled={loading} variant={"contained"} sx={{ width: 250 }} onClick={handleGoButtonClick}>GO</Button>
+
+                        {dropState == "done" && failures.length ? <Link sx={{ fontSize: 32 }} href={`data:text/csv,${encodeURIComponent(mapFailuresToCsv(failures))}`} target={"_blank"} >Download failed transactions CSV</Link> : <Button disabled={loading} variant={"contained"} sx={{ width: 250 }} onClick={handleGoButtonClick}>GO</Button>}
                     </>
                     : <CsvFileAcceptor onRowsLoaded={onRowsLoaded} setLoading={setRowsLoading} />}
             </Stack>

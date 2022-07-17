@@ -14,6 +14,7 @@ export const CsvFileAcceptor = ({ onRowsLoaded, setLoading }) => {
 
         if (file) {
             Papa.parse(file, {
+                skipEmptyLines: true,
                 step: (results, parser) => {
                     let { data } = results;
                     let [address, mintAddress, amount] = data;
