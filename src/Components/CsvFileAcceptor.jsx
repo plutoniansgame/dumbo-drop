@@ -32,10 +32,13 @@ export const CsvFileAcceptor = ({ onRowsLoaded, setLoading }) => {
         }
     }
 
-    return <Stack direction="row" justifyContent={"center"}>
-        <Box {...getRootProps({ isFocused, isDragAccept, isDragReject })}>
-            <input {...getInputProps()} />
-            <p>Drag 'n' drop some files here, or click to select files</p>
+    return <Stack direction="row" justifyContent={"center"} alignItems={"center"}>
+        <Box sx={{ width: "800px", height: 300, borderRadius: 10, border: "4px dashed green", backgroundColor: "lightgreen", marginTop: "80px" }} {...getRootProps({ isFocused, isDragAccept, isDragReject })}>
+            <Stack direction="column" alignItems={"center"}>
+                <input {...getInputProps()} />
+                <p>Drag a CSV file here</p>
+                <p>Or click here to select a file</p>
+            </Stack>
         </Box>
-    </Stack>
+    </Stack >
 };

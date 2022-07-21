@@ -1,7 +1,7 @@
 import { Transaction } from "@solana/web3.js";
 import { Token, TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID } from "@solana/spl-token";
 
-const sleep = ms => new Promise(r => setTimeout(r, ms));
+export const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 export const makeDropTransaction = async (connection, wallet, rowData, index) => {
     const { address, mintAddress, amount } = rowData;
@@ -22,6 +22,7 @@ export const makeDropTransaction = async (connection, wallet, rowData, index) =>
     tx.add(transferIx);
 
     try {
+        await sleep(500);
         const { blockhash } = await connection.getRecentBlockhash();
         tx.feePayer = wallet.publicKey;
         tx.recentBlockhash = blockhash;
@@ -33,25 +34,6 @@ export const makeDropTransaction = async (connection, wallet, rowData, index) =>
 }
 
 const associatedTokenAccountExists = async (connection, associatedTokenAccountAddress) => {
-    try {
-        const account = await connection.getAccountInfo(associatedTokenAccountAddress);
-
-        console.log("ata?", associatedTokenAccountAddress.toBase58())
-        if (account) {
-            const { data } = account;
-            console.log("data", data)
-            return true;
-        } else {
-            return false;
-        }
-    } catch (e) {
-        // if (e instanceof TokenAccountNotFoundError) {
-        //     return false;
-        // } else {
-        throw e;
-        // }
-
-    }
-
-
+    const account = await connection.getAccountInfo(associatedTokenAccountAddress);
+    return !!account;
 }
