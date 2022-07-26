@@ -80,11 +80,9 @@ export const Home = () => {
 
             for (let i = 0; i < serialized.length; i++) {
                 try {
-                    const signature = await connection.sendRawTransaction(serialized[i]);
+                    await connection.sendRawTransaction(serialized[i]);
                 } catch (e) {
-                    console.log(e);
                     tmpFailures.push(`${currentBatch}${i}`);
-                    console.log({ failures })
                 }
 
                 await sleep(500);
@@ -92,7 +90,7 @@ export const Home = () => {
             }
             setCurrentBatch(currentBatch + 1);
         }
-        if (failures.length) {
+        if (tmpFailures.length) {
             const failedRows = tmpFailures.map(n => mappa.get(n))
             setFailures(failedRows);
         }
