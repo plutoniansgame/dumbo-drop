@@ -1,5 +1,10 @@
 # Getting Started with Create React App
 
+## If you just want to use the airdropper: https://dumbo.pluto.quest
+
+1. Please see the demo csv: https://github.com/plutoniansgame/dumbo-drop/blob/main/test.csv
+2. Please note it ignores decimal. If you have a 6 decimal token you may need to pad the number out
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
